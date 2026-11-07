@@ -256,8 +256,6 @@ struct DashboardView: View {
                 }
                 detailField("Last activity", item.updatedAt.formatted(date: .abbreviated, time: .standard))
                 Divider()
-                Text("“Turn complete” only means this turn ended; the overall task may still need follow-up. An unfinished turn counts as running only while its app is running.")
-                    .font(.system(size: 14)).foregroundStyle(.secondary)
                 Button("Open This Conversation") { monitor.activate(item) }.buttonStyle(.borderedProminent).hoverFeedback()
                     .help("Jumps to this conversation when the source supports it; otherwise opens the app and copies the title")
             }.padding(22)

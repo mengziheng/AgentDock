@@ -79,10 +79,10 @@ extension ConversationScanner {
             let evidence: String
             switch state {
             case .failed: evidence = String(localized: "Devin returned ContentFilter: the model provider refused the request and it cannot be retried as is. Switch models or adjust the request.") + (refusal?.traceID.map { " " + String(localized: "Trace ID: \($0)") } ?? "")
-            case .running: evidence = String(localized: "Devin holds this session's lock and the latest message is not a final reply")
+            case .running: evidence = String(localized: "Devin is still working on this conversation and has not given a final reply for this turn")
             case .awaitingInput: evidence = String(localized: "Devin asked a question and is waiting for your answer")
-            case .completed: evidence = String(localized: "The latest message is Devin's final reply for this turn")
-            case .interrupted: evidence = String(localized: "The turn has no final reply and Devin no longer holds the session lock")
+            case .completed: evidence = String(localized: "Devin gave its final reply for this turn; the overall task may still need follow-up")
+            case .interrupted: evidence = String(localized: "The turn has no final reply and Devin is no longer working on this conversation")
             case .unknown: evidence = String(localized: "No conversation turn was found in Devin's local session store")
             }
             let activity = max(cliDate, refusal?.date ?? .distantPast)

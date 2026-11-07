@@ -132,12 +132,15 @@ final class AppMonitor: ObservableObject {
             // explicitly so LaunchServices cannot send the thread to a different app.
             openConversationURL(URL(string: "codex://threads/\(conversation.sessionID)")!, withBundleID: codex.handlerBundleID, fallbackPath: codex.applicationPath, applicationName: name)
         } else if conversation.application.id == TrackedApplication.devin.id {
-            // This is Devin's own cascade editor resource format. Session IDs may contain
-            // slashes (for example acp/devin-cli/...), which are intentionally kept as path.
+            // Devin's registered `devin://acp/session` route switches to a local session given
+            // `acp/<connectorId>/<sessionId>` split into its two query parameters.
+            let parts = conversation.sessionID.split(separator: "/", omittingEmptySubsequences: false)
             var components = URLComponents()
-            components.scheme = "vscode-cascade-editor"
-            components.path = "/cascade-" + conversation.sessionID
-            guard let resource = components.url else {
+            components.scheme = "devin"
+            components.host = "acp"
+            components.path = "/session"
+            components.queryItems = parts.count == 3 && parts[0] == "acp" ? [URLQueryItem(name: "connectorId", value: String(parts[1])), URLQueryItem(name: "sessionId", value: String(parts[2]))] : nil
+            guard components.queryItems != nil, let resource = components.url else {
                 activateApplication(for: conversation, reason: String(localized: "Could not build a link to this conversation"))
                 return
             }

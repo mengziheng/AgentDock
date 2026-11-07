@@ -61,7 +61,6 @@
 "Turn started" = "本轮开始";
 "Last activity" = "最近记录";
 "Not provided" = "未提供";
-"“Turn complete” only means this turn ended; the overall task may still need follow-up. An unfinished turn counts as running only while its app is running." = "“本轮已完成”只表示这一轮结束，整个任务可能还需要跟进。未结束的轮次只有在来源应用运行时才显示为执行中。";
 "Open This Conversation" = "打开此对话";
 "Jumps to this conversation when the source supports it; otherwise opens the app and copies the title" = "来源支持时直接跳转到这个对话；不支持时打开应用并复制标题";
 
@@ -128,10 +127,10 @@
 /* Devin evidence */
 "Devin returned ContentFilter: the model provider refused the request and it cannot be retried as is. Switch models or adjust the request." = "Devin 返回 ContentFilter：模型供应商拒绝了请求，且标记为不可原样重试；请更换模型或调整请求。";
 "Trace ID: %@" = "trace ID：%@";
-"Devin holds this session's lock and the latest message is not a final reply" = "Devin 持有此会话的执行锁，且最新消息还不是本轮的最终回复";
+"Devin is still working on this conversation and has not given a final reply for this turn" = "Devin 仍在处理这个对话，还没有给出本轮的最终回复";
 "Devin asked a question and is waiting for your answer" = "Devin 提出了问题，正在等你回答";
-"The latest message is Devin's final reply for this turn" = "最新消息是 Devin 本轮的最终回复";
-"The turn has no final reply and Devin no longer holds the session lock" = "本轮没有最终回复，且 Devin 已不再持有会话锁";
+"Devin gave its final reply for this turn; the overall task may still need follow-up" = "Devin 已给出本轮的最终回复，整个任务可能还需要跟进";
+"The turn has no final reply and Devin is no longer working on this conversation" = "本轮没有给出最终回复，Devin 也已不在处理这个对话";
 "No conversation turn was found in Devin's local session store" = "Devin 本地会话库中没有找到对话轮次";
 
 /* Orca evidence */
