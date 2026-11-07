@@ -1,0 +1,35 @@
+# Swift / Xcode build output
+.build/
+.swiftpm/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+
+# Local packaging and working directories
+/dist/
+/outputs/
+/work/
+*.app/
+*.dmg
+*.zip
+*.dSYM/
+
+# Local application data must never be committed
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+*.log
+*.jsonl
+*.ndjson
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.mobileprovision
+
+# macOS metadata
+.DS_Store
+._*

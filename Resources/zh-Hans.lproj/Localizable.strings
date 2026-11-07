@@ -1,0 +1,146 @@
+/* Workbench */
+"AgentDock" = "AgentDock";
+"Every conversation, accounted for." = "每个对话，都有着落。";
+"See what is still working, what just finished, and what needs you." = "看清谁还在工作，谁刚刚交付，谁需要你接手。";
+"Following" = "跟进中的任务";
+"Library" = "对话库";
+"Running" = "执行中";
+"Needs input" = "待输入";
+"To review" = "待验收";
+"Issues" = "异常";
+"Workspace" = "工作台";
+"Sources" = "来源";
+"All apps" = "所有应用";
+"Counts individual conversations,\nnot running apps." = "统计的是具体对话\n不是运行中的应用。";
+"Search title, project, or ID" = "搜索标题、项目或对话 ID";
+"Accept All" = "全部验收";
+"Remove every conversation shown here from Following. Original conversations are not deleted." = "把这里列出的对话全部移出跟进列表；不会删除原应用中的对话。";
+"No conversations match this filter" = "当前筛选下没有对话";
+"Only connected sources are counted. An unconnected source or an unclear status does not mean the task has ended." = "仅统计已接入来源。未接入或状态待确认，不表示任务已经结束。";
+"%lld accepted" = "已验收 %lld 项";
+"Undo" = "撤销";
+"Local and read-only · refreshes every 8 seconds · %@" = "本地只读 · 每 8 秒刷新 · %@";
+"Source Details" = "接入详情";
+"Open Conversation" = "打开对话";
+"OK" = "知道了";
+"Enter or exit full screen ⌃⌘F" = "进入／退出全屏 ⌃⌘F";
+"Refresh conversations ⌘R" = "刷新对话 ⌘R";
+"Refresh Conversations" = "刷新对话";
+"Toggle Full Screen" = "切换全屏";
+
+/* Cards */
+"Accept" = "确认验收";
+"Accept and remove from Following. The original conversation is not deleted and running work is not stopped." = "确认验收并移出跟进列表；不会删除原应用对话，也不会停止正在执行的任务。";
+"Removes it from Following without deleting the original conversation" = "确认后从跟进列表移除，不删除原应用中的聊天记录";
+"Answer" = "去回答";
+"Open" = "打开对话";
+"Jumps to this conversation when the source supports it; otherwise explains what happened" = "来源支持时直接跳转到这个对话；不支持时会说明原因";
+"Running for %@" = "已执行 %@";
+"Measured from the start of this turn" = "从本轮开始执行的时间算起";
+"Measured from the latest recorded activity; the source did not record when this turn started" = "来源未记录本轮开始时间，从最近一次活动记录算起";
+"%lldh %lldm" = "%1$lld小时 %2$lld分";
+"%lldm %llds" = "%1$lld分 %2$lld秒";
+"%llds" = "%lld秒";
+"Waiting since %@" = "等待输入于 %@";
+"Completed at %@" = "完成于 %@";
+"Failed at %@" = "出错于 %@";
+"Interrupted at %@" = "中断于 %@";
+"Last activity %@" = "最后记录 %@";
+
+/* Details */
+"Conversation Details" = "对话详情";
+"Status evidence" = "状态依据";
+"Source" = "来源";
+"Project" = "所在项目";
+"How the project was identified" = "项目识别依据";
+"Working directory" = "工作目录";
+"Title source" = "标题来源";
+"Opening message" = "首条消息";
+"Conversation ID" = "对话 ID";
+"Copy Conversation ID" = "复制对话 ID";
+"Turn started" = "本轮开始";
+"Last activity" = "最近记录";
+"Not provided" = "未提供";
+"“Turn complete” only means this turn ended; the overall task may still need follow-up. An unfinished turn counts as running only while its app is running." = "“本轮已完成”只表示这一轮结束，整个任务可能还需要跟进。未结束的轮次只有在来源应用运行时才显示为执行中。";
+"Open This Conversation" = "打开此对话";
+"Jumps to this conversation when the source supports it; otherwise opens the app and copies the title" = "来源支持时直接跳转到这个对话；不支持时打开应用并复制标题";
+
+/* Source sheet */
+"Sources and Counting Rules" = "接入范围与统计口径";
+"Conversations detected as running or waiting for input join Following. They stay after finishing, failing, or being interrupted until you click Accept, and come back when a new turn starts. Accepting only removes AgentDock's record; the original conversation is untouched." = "检测到正在执行或等待输入的对话会自动加入跟进列表。结束、出错或中断后仍保留，直到你点“确认验收”；再次检测到新一轮执行时重新加入。验收只移除 AgentDock 的跟踪记录，不改动原应用中的对话。";
+"Only conversations recognizable in local storage are listed; this is not the set of tabs currently open. To add another Codex-compatible app, list it in ~/Library/Application Support/AgentDock/codex-apps.json." = "这里只列出本地存储中可识别的对话，与当前打开的标签页无关。要接入其他兼容 Codex 的应用，请写入 ~/Library/Application Support/AgentDock/codex-apps.json。";
+"Done" = "完成";
+
+/* Notices */
+"Could not build a link to this conversation" = "无法生成该对话的跳转地址";
+"This app has no verified way to open a specific conversation" = "该应用暂未提供可验证的对话跳转方式";
+"%@ was not found, so the conversation cannot be opened." = "未找到 %@，无法打开对应对话。";
+"Could not open the %@ conversation: %@" = "打开 %1$@ 对话失败：%2$@";
+"The app did not report a result. Look for the conversation inside the app." = "应用未返回打开结果，请在应用内查找该对话。";
+"%@ was not found. The conversation title has been copied." = "未找到 %@。对话标题已复制。";
+"Could not open %@: %@" = "打开 %1$@ 失败：%2$@";
+"The app did not report a launch result. The conversation title has been copied." = "应用未返回启动结果。对话标题已复制。";
+"%@. Opened the app and copied the conversation title; look for it inside the app." = "%@。已打开应用并复制对话标题，请在应用内查找。";
+
+/* Execution states */
+"Turn complete" = "本轮已完成";
+"Failed" = "执行出错";
+"Interrupted" = "已中断";
+"Status unclear" = "状态待确认";
+
+/* Sources */
+"Official Codex" = "官方 Codex";
+"Could not read %@: %@" = "无法读取 %1$@：%2$@";
+"Connected: conversations and remote terminal agent status" = "已接入：具体对话与远程终端 Agent 状态";
+"Connected: conversations and turn status" = "已接入：对话与轮次状态";
+"Connected: conversations, turn status, and provider refusals" = "已接入：具体对话、轮次状态与模型供应商拒绝";
+"Not connected: session store is not readable" = "尚未接入：会话存储不可读";
+"Not connected: database missing or format changed" = "尚未接入：数据库缺失或结构变化";
+"Untitled conversation" = "未命名对话";
+"Conversation name saved by the app" = "来自应用保存的对话名称";
+"The source saved no conversation name; showing the first message" = "来源未保存对话名称，暂用首条消息作为标题";
+"Conversation title saved by the source app" = "来自来源应用保存的对话标题";
+"Project not identified" = "项目未识别";
+"The source only provides a working directory, not a project" = "来源仅提供工作目录，未提供项目归属";
+"Project link in the conversation database" = "来自对话数据库的项目关联";
+"No project" = "未关联项目";
+"The app marked this conversation as having no project; the working directory is shown separately" = "应用明确将此对话标记为无项目；工作目录单独显示";
+"Project assignment saved by the app" = "来自应用保存的对话项目归属";
+"Matched the working directory to a saved project root; no direct link found" = "由工作目录匹配已保存的项目根目录，未找到直接关联";
+"No reliable project mapping; a working directory is not necessarily a project" = "没有可靠的项目名称映射；工作目录与项目可能不一致";
+
+/* Codex evidence */
+"From the rollout log, which is newer than the turn database" = "来自更新的执行日志（轮次数据库可能滞后）";
+"From the latest turn database record" = "来自最新轮次数据库记录";
+"The agent asked a question that has no answer yet; waiting for you" = "Agent 提出的问题尚未得到回答，正在等你回复";
+"The turn has not finished and %@ is running" = "轮次尚未结束，且 %@ 正在运行";
+"The turn never finished and %@ has quit or restarted since its last activity" = "轮次没有正常结束，且 %@ 在最后一次活动之后已退出或重启";
+"This turn finished; the overall task may still need follow-up" = "这一轮已结束，整个任务可能还需要跟进";
+"The log changed after the last turn record, but no turn event could be read" = "最后一条轮次记录之后日志仍有变化，但没有读到轮次事件";
+"The turn ended with an error or was stopped" = "轮次以错误结束或被停止";
+"Error: %@" = "错误：%@";
+"The run returned an error" = "执行返回了错误信息";
+"The source no longer lists this conversation while it was still active; the last record is kept until you accept it" = "对话仍在进行时，来源不再列出它；保留最后记录直到你确认验收";
+
+/* Devin evidence */
+"Devin returned ContentFilter: the model provider refused the request and it cannot be retried as is. Switch models or adjust the request." = "Devin 返回 ContentFilter：模型供应商拒绝了请求，且标记为不可原样重试；请更换模型或调整请求。";
+"Trace ID: %@" = "trace ID：%@";
+"Devin holds this session's lock and the latest message is not a final reply" = "Devin 持有此会话的执行锁，且最新消息还不是本轮的最终回复";
+"Devin asked a question and is waiting for your answer" = "Devin 提出了问题，正在等你回答";
+"The latest message is Devin's final reply for this turn" = "最新消息是 Devin 本轮的最终回复";
+"The turn has no final reply and Devin no longer holds the session lock" = "本轮没有最终回复，且 Devin 已不再持有会话锁";
+"No conversation turn was found in Devin's local session store" = "Devin 本地会话库中没有找到对话轮次";
+
+/* Orca evidence */
+"Orca saved this sleeping session as done; this is not a live signal" = "Orca 保存的休眠会话记录为 done；这不是实时运行信号";
+"Conversation read from Orca; its remote or unrecorded execution status cannot be confirmed" = "已读取 Orca 中的具体对话；远端或未记录的执行状态暂时无法确认";
+"Orca earlier recorded this terminal agent as running; its agentStatus is now cleared while the terminal still exists, so the turn has ended" = "Orca 曾记录该终端 Agent 正在执行；现在 agentStatus 已清除且终端仍存在，表示该轮已结束";
+"Custom title of the Orca tab" = "来自 Orca 标签页自定义标题";
+"Orca remote terminal title" = "来自 Orca 远程终端标题";
+"From the worktreeId of the Orca remote agent" = "来自 Orca 远程 Agent 的 worktreeId";
+"Orca's remote layout snapshot reports agentStatus %@: the terminal agent is running" = "Orca 远程布局快照中的 agentStatus 为 %@，该终端 Agent 正在执行";
+"Orca reports agentStatus waiting and the terminal is marked Action Required: waiting for your input" = "Orca 的 agentStatus 为 waiting，且终端标记为 Action Required，正在等待你输入";
+"Orca's remote layout snapshot reports agentStatus %@: this turn has ended" = "Orca 远程布局快照中的 agentStatus 为 %@，该轮已结束";
+"Orca's remote layout snapshot reports agentStatus %@: execution failed" = "Orca 远程布局快照中的 agentStatus 为 %@，执行发生错误";
+"Orca's remote layout snapshot reports agentStatus %@: execution was interrupted" = "Orca 远程布局快照中的 agentStatus 为 %@，执行已中断";
+"Read an Orca remote terminal agent, but its status %@ cannot be interpreted" = "已读取 Orca 远程终端 Agent，但无法解释其状态 %@";
