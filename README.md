@@ -1,68 +1,56 @@
-# AgentDock
+<p align="center">
+  <img src="Resources/AgentDock.iconset/icon_256x256.png" width="112" alt="AgentDock 图标">
+</p>
 
-简体中文 · [English](README.en.md)
+<h1 align="center">AgentDock</h1>
 
-[![CI](https://github.com/mengziheng/AgentDock/actions/workflows/ci.yml/badge.svg)](https://github.com/mengziheng/AgentDock/actions/workflows/ci.yml)
+<p align="center">
+  <b>一个窗口，看清所有 AI 对话的进度。</b><br>
+  同时开着 Codex、Orca、Devin 时，哪条还在跑、哪条做完了、哪条在等你回答，一眼就能看到。
+</p>
 
-**把分散在多个 AI 应用里的对话，收进一个工作台。**
+<p align="center">
+  <a href="https://github.com/mengziheng/AgentDock/actions/workflows/ci.yml"><img src="https://github.com/mengziheng/AgentDock/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <img src="https://img.shields.io/badge/macOS-13%2B-black?logo=apple" alt="macOS 13+">
+  <img src="https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white" alt="Swift 6">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License"></a>
+</p>
 
-同时用 Codex、Orca 和 Devin 做几件事，很容易忘记哪条对话还在跑、哪条已经交付、哪条正等你回答。AgentDock 把这些对话集中到一个原生 macOS 窗口，需要你处理时发出系统通知。
+<p align="center">简体中文 · <a href="README.en.md">English</a></p>
 
-本地运行 · 只读扫描 · 无账号 · 无遥测 · 中英文界面 · MIT 开源
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/dashboard-dark.png">
+  <img src="docs/images/dashboard-light.png" alt="AgentDock 工作台示例：执行中、待输入、异常和待验收的对话">
+</picture>
 
-![AgentDock 工作台：同时查看执行中、待输入、异常和待验收的对话](docs/images/dashboard-light.png)
+## 功能
 
-<sub>截图由项目代码渲染，任务均为虚构。</sub>
+- **集中查看**：各应用里的对话按状态分成四组，可以按标题、项目或对话 ID 搜索。
+- **主动提醒**：对话做完、等你回答或出错时发系统通知，点一下就回到那条对话。Dock 图标显示待输入和异常的数量。
+- **不漏结果**：做完的对话一直留在列表里，直到你确认验收；可以一次全部验收，误点后能撤销。
+- **数据不出本机**：直接读取各应用保存在本机的记录，不需要账号，不上传任何内容。
 
-<details>
-<summary>查看深色模式</summary>
-
-![AgentDock 深色模式](docs/images/dashboard-dark.png)
-
-</details>
-
-## 它能帮你做什么
-
-- **少切几个窗口。** 在一处查看各应用的对话标题、所在项目和当前状态，可以按标题、项目或对话 ID 搜索。
-- **不用盯着窗口。** 跟进中的对话结束、等你回答或出错时，AgentDock 发送系统通知，点击通知即可打开该对话。Dock 图标上的数字是“待输入”和“异常”的总数。
-- **记住还没验收的结果。** 正在执行或等你回答的对话会自动加入跟进，结束后继续保留，直到你点“确认验收”。可以一次验收整个列表，误点后 8 秒内可以撤销。
-- **回到原应用处理。** Codex 的对话可以直接跳转；Devin 会尝试跳转到对应会话；Orca 会打开应用并复制对话标题，方便你查找。
-
-### 四种状态
-
-| 状态 | 你需要做什么 |
-|---|---|
-| **执行中** | 让它继续工作，稍后再看 |
-| **待验收** | 检查本轮结果，满意后确认验收 |
-| **待输入** | 回到对话，回答问题或作出选择 |
-| **异常** | 打开详情，查看报错、中断或状态不确定的原因 |
-
-“确认验收”只移除 AgentDock 的跟进记录，原对话保持不变。同一对话开始新一轮执行时，它会重新出现。
+| 状态 | 含义 | 你要做的 |
+|---|---|---|
+| 执行中 | Agent 还在工作 | 稍后再看 |
+| 待验收 | 这一轮已经做完 | 检查结果，确认验收 |
+| 待输入 | Agent 在等你回答 | 回到对话作答 |
+| 异常 | 出错、中断或状态不明 | 打开详情看原因 |
 
 ## 支持的应用
 
-| 应用 | 能识别的内容 | 测试过的版本 |
+| 应用 | 能识别什么 | 测试版本 |
 |---|---|---|
-| **官方 Codex**（ChatGPT 桌面应用） | 桌面对话、所在项目和每一轮的状态 | 26.1027.30824 |
-| **其他兼容 Codex 的应用** | 在本机配置文件中登记后，识别方式与官方 Codex 相同，见[配置方法](docs/compatibility.md#其他兼容-codex-的应用) | — |
-| **Orca** | 远程终端里的 Agent，以及本机标签页里运行的 Codex CLI 对话 | 1.4.243 |
-| **Devin** | 本地会话的执行中、待输入、已完成、已中断和模型供应商拒绝 | 3.12.17 |
+| 官方 Codex | 桌面对话和每一轮的状态，可直接跳转到对话 | 26.1027.30824 |
+| Orca | 远程终端里的 Agent，以及本机标签页里的 Codex CLI | 1.4.243 |
+| Devin | 执行中、待输入、完成、中断和模型拒绝，会尝试跳转到会话 | 3.12.17 |
+| 其他兼容 Codex 的应用 | 写进配置文件后，与官方 Codex 相同（[配置方法](docs/compatibility.md#其他兼容-codex-的应用)） | — |
 
-测试环境为 macOS 26.6.2（Apple Silicon）。AgentDock 读取的是各应用的本地存储，应用升级可能改变存储格式；如果识别结果不对，请先对照上表核对版本。
-
-**已知限制**
-
-- Codex 等你批准命令、Devin 等你授权工具时，显示为“执行中”。这两个应用不会把这类请求写进本地记录。
-- Orca 的本机标签页只识别运行 Codex CLI 的；其他 Agent 只能识别已经结束的休眠会话。
-- 这是实验性预览版，重要任务请在原应用中确认。完整的识别规则见[兼容性与识别限制](docs/compatibility.md)。
+测试环境为 macOS 26.6.2（Apple Silicon）。Codex 等你批准命令、Devin 等你授权工具时会显示为“执行中”，因为这两个应用不在本机记录这类请求。完整说明见[兼容性与识别限制](docs/compatibility.md)。
 
 ## 安装
 
-需要：
-
-- macOS 13 或更新版本
-- Xcode 16 或更新版本；也可以只装 Command Line Tools，但需要包含 Swift 6
-- Python 3（安装 Command Line Tools 时会一并装上）
+需要 macOS 13 及以上，以及 Xcode 16 或包含 Swift 6 的 Command Line Tools。
 
 ```bash
 git clone https://github.com/mengziheng/AgentDock.git
@@ -71,60 +59,48 @@ bash scripts/install-app.sh "$HOME/Applications/AgentDock.app"
 open "$HOME/Applications/AgentDock.app"
 ```
 
-安装脚本从源码构建 App，用本机临时签名（ad-hoc），不会添加登录项。目前没有经过 Apple 签名和公证的安装包，只能从源码安装。
+目前没有经过 Apple 签名的安装包，需要从源码安装。首次打开时请允许通知；界面语言跟随系统，支持中文和英文。
 
-首次打开时 macOS 会询问是否允许通知；拒绝了也不影响其他功能，之后可以在“系统设置 → 通知”中开启。界面语言跟随系统，支持简体中文和英文。需要开机自动打开时，在“系统设置 → 通用 → 登录项”中添加 `AgentDock.app`。
+<details>
+<summary><b>更新与卸载</b></summary>
 
-## 更新
+**更新**：退出 AgentDock，在源码目录运行 `git pull`，再执行一次上面的安装命令。跟进记录会保留。
 
-先退出 AgentDock，然后在源码目录运行：
+**卸载**：退出并删除 `AgentDock.app`，然后清除本地记录（各应用里的对话不受影响）：
 
 ```bash
-git pull
-bash scripts/install-app.sh "$HOME/Applications/AgentDock.app"
+defaults delete com.local.AgentDock
+rm -rf "$HOME/Library/Application Support/AgentDock"
 ```
 
-跟进和验收记录会保留。
+</details>
 
-## 卸载
+<details>
+<summary><b>遇到问题</b></summary>
 
-1. 退出 AgentDock，删除 `AgentDock.app`。
-2. 如果添加过登录项，在“系统设置 → 通用 → 登录项”中移除。
-3. 删除 AgentDock 自己的本地记录：
-
-   ```bash
-   defaults delete com.local.AgentDock
-   rm -rf "$HOME/Library/Application Support/AgentDock"
-   ```
-
-   第一条删除跟进和验收记录，第二条删除兼容 Codex 应用的配置文件。各来源应用里的对话不受影响。
-
-## 遇到问题
-
-- **侧栏的来源旁显示橙点**：表示没有读到这个应用的数据。点窗口右下角的“接入详情”查看原因，常见原因是没装这个应用、还没在这台电脑上用过，或者应用升级后存储格式变了。
-- **状态看起来不对**：点开卡片，看详情里的“状态依据”，它说明了这个判断来自哪条记录。
-- **想检查各来源的识别情况**：在源码目录运行下面的命令。它连续扫描两次并输出耗时，再按应用列出对话数量和各状态的计数，不会输出标题、路径或对话内容。
+- **侧栏的来源旁显示橙点**：没有读到这个应用的数据。点窗口右下角的“接入详情”查看原因。
+- **状态看起来不对**：点开卡片，详情里的“状态依据”说明了判断来自哪条记录。
+- **检查各来源的识别情况**：运行下面的命令，它只输出各应用的对话数量和状态计数，不包含对话内容。
 
   ```bash
-  swift build -c release --product AgentDockScan
-  .build/release/AgentDockScan
+  swift build -c release --product AgentDockScan && .build/release/AgentDockScan
   ```
 
-- **仍然解决不了**：提交 Issue，写明来源应用的版本和复现步骤，附上上面的诊断输出，并移除截图里的真实工作内容。
+- 仍然解决不了，请[提交 Issue](https://github.com/mengziheng/AgentDock/issues)，写明应用版本和复现步骤。
 
-## 对话数据留在本机
+</details>
 
-AgentDock 没有后端服务，不调用模型，也不会上传对话或日志。它以只读方式读取来源应用的数据库和状态文件，跟进与验收记录只保存在本机。
+## 隐私
 
-这些本地记录可能包含对话标题、路径、首条消息和错误摘要，系统通知也会显示对话标题。读取了哪些位置见[本地数据说明](docs/compatibility.md#本地数据)，隐私问题见 [SECURITY.md](SECURITY.md)。
+AgentDock 没有服务器，不调用模型，只以只读方式读取本机数据。它保存的跟进记录可能包含对话标题和路径，系统通知也会显示对话标题。详见 [SECURITY.md](SECURITY.md)。
 
-## 开发与贡献
+## 参与开发
 
 ```bash
 swift build -c release
 scripts/test.sh
 ```
 
-`scripts/test.sh` 运行 `swift test`；只装了 Command Line Tools 时，它会补上 Swift Testing 框架的路径。装有 Xcode 时也可以直接运行 `swift test`。测试只使用合成数据，每次推送和 Pull Request 都会在 GitHub Actions 上构建并测试。欢迎反馈状态误判、版本兼容和使用体验，参见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+测试只使用虚构数据。欢迎反馈识别错误和兼容性问题，参见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
-[MIT License](LICENSE) · 非官方独立项目，与所列应用及其供应商没有隶属或背书关系。
+<sub>MIT License · 独立项目，与所列应用及其开发商没有关联。截图中的任务均为虚构。</sub>

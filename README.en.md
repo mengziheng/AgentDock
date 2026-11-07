@@ -1,68 +1,56 @@
-# AgentDock
+<p align="center">
+  <img src="Resources/AgentDock.iconset/icon_256x256.png" width="112" alt="AgentDock icon">
+</p>
 
-[简体中文](README.md) · English
+<h1 align="center">AgentDock</h1>
 
-[![CI](https://github.com/mengziheng/AgentDock/actions/workflows/ci.yml/badge.svg)](https://github.com/mengziheng/AgentDock/actions/workflows/ci.yml)
+<p align="center">
+  <b>One window for the progress of every AI conversation.</b><br>
+  With Codex, Orca, and Devin all open, see at a glance what is still running, what is done, and what is waiting for you.
+</p>
 
-**One workspace for the conversations spread across your AI apps.**
+<p align="center">
+  <a href="https://github.com/mengziheng/AgentDock/actions/workflows/ci.yml"><img src="https://github.com/mengziheng/AgentDock/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <img src="https://img.shields.io/badge/macOS-13%2B-black?logo=apple" alt="macOS 13+">
+  <img src="https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white" alt="Swift 6">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License"></a>
+</p>
 
-When Codex, Orca, and Devin are all working on something, it is easy to lose track of which conversation is still running, which one has finished, and which one is waiting for your answer. AgentDock gathers them into one native macOS window and sends a notification when one needs you.
+<p align="center"><a href="README.md">简体中文</a> · English</p>
 
-Local only · read-only · no account · no telemetry · English and Chinese UI · MIT licensed
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/dashboard-en-dark.png">
+  <img src="docs/images/dashboard-en-light.png" alt="AgentDock workspace example: running, needs-input, failed, and finished conversations">
+</picture>
 
-![AgentDock workspace showing running, needs-input, failed, and finished conversations](docs/images/dashboard-en-light.png)
+## Features
 
-<sub>Rendered from the project's own UI code with fictional tasks.</sub>
+- **One place to look**: conversations from every app are grouped into four states and searchable by title, project, or conversation ID.
+- **Notifications**: when a conversation finishes, waits for your answer, or fails, you get a system notification that opens it in one click. The Dock badge counts conversations that need input or have issues.
+- **Nothing slips through**: finished conversations stay listed until you accept them; accept a whole list at once and undo a mistake.
+- **Data stays on your Mac**: AgentDock reads the records each app keeps locally. No account, nothing uploaded.
 
-<details>
-<summary>Dark mode</summary>
-
-![AgentDock in dark mode](docs/images/dashboard-en-dark.png)
-
-</details>
-
-## What it does
-
-- **Fewer windows to check.** See every app's conversations with their project and current status in one place, and search by title, project, or conversation ID.
-- **No need to keep watching.** When a followed conversation finishes, waits for your answer, or fails, AgentDock sends a system notification; clicking it opens that conversation. The Dock badge shows how many conversations need input or have issues.
-- **Unreviewed results stay put.** Conversations that are running or waiting for you are followed automatically and stay after they finish until you click Accept. You can accept a whole list at once and undo within 8 seconds.
-- **Back to the source app.** Codex conversations open directly; Devin tries to open the matching session; Orca is brought to the front with the conversation title copied so you can find it.
-
-### Four states
-
-| State | What to do |
-|---|---|
-| **Running** | Let it work and check back later |
-| **To review** | Check this turn's result and accept it when you are satisfied |
-| **Needs input** | Go back and answer the question or make a choice |
-| **Issues** | Open the details to see the error, interruption, or why the status is unclear |
-
-Accepting only removes AgentDock's record; the original conversation is untouched. The conversation comes back when a new turn starts.
+| State | Meaning | What to do |
+|---|---|---|
+| Running | The agent is still working | Check back later |
+| To review | This turn is done | Review the result and accept it |
+| Needs input | The agent is waiting for you | Answer in the conversation |
+| Issues | Failed, interrupted, or unclear | Open the details for the reason |
 
 ## Supported apps
 
-| App | What AgentDock recognizes | Tested version |
+| App | What it recognizes | Tested version |
 |---|---|---|
-| **Official Codex** (ChatGPT desktop app) | Desktop conversations, their projects, and the status of each turn | 26.1027.30824 |
-| **Other Codex-compatible apps** | Same as official Codex once listed in a local config file; see the [configuration](docs/compatibility.md#其他兼容-codex-的应用) | — |
-| **Orca** | Agents in remote terminals, and Codex CLI conversations in local tabs | 1.4.243 |
-| **Devin** | Running, needs input, finished, interrupted, and model-provider refusals for local sessions | 3.12.17 |
+| Official Codex | Desktop conversations and the status of each turn; opens the conversation directly | 26.1027.30824 |
+| Orca | Agents in remote terminals, and the Codex CLI in local tabs | 1.4.243 |
+| Devin | Running, needs input, finished, interrupted, and model refusals; tries to open the session | 3.12.17 |
+| Other Codex-compatible apps | Same as official Codex once added to a config file ([how](docs/compatibility.md#其他兼容-codex-的应用)) | — |
 
-Tested on macOS 26.6.2 (Apple Silicon). AgentDock reads each app's local storage, which an app update can change; if a status looks wrong, first compare your versions with this table.
-
-**Known limitations**
-
-- When Codex waits for you to approve a command or Devin waits for tool permission, the conversation shows as Running. Neither app writes these requests to local storage.
-- Among Orca's local tabs, only those running the Codex CLI are recognized; for other agents only finished, sleeping sessions are.
-- This is an experimental preview; confirm important work in the source app. The full detection rules are in [compatibility and limitations](docs/compatibility.md) (Chinese).
+Tested on macOS 26.6.2 (Apple Silicon). When Codex waits for command approval or Devin waits for tool permission, the conversation shows as Running, because neither app records these requests locally. Full details are in [compatibility and limitations](docs/compatibility.md) (Chinese).
 
 ## Install
 
-Requirements:
-
-- macOS 13 or later
-- Xcode 16 or later, or the Command Line Tools with Swift 6
-- Python 3 (installed with the Command Line Tools)
+Requires macOS 13 or later and Xcode 16 or the Command Line Tools with Swift 6.
 
 ```bash
 git clone https://github.com/mengziheng/AgentDock.git
@@ -71,60 +59,48 @@ bash scripts/install-app.sh "$HOME/Applications/AgentDock.app"
 open "$HOME/Applications/AgentDock.app"
 ```
 
-The script builds the app from source and signs it ad hoc for this Mac; it does not add a login item. There is no Apple-signed, notarized download yet, so installing from source is the only option.
+There is no Apple-signed download yet, so install from source. Allow notifications on first launch; the UI follows the system language (English or Chinese).
 
-On first launch macOS asks whether AgentDock may send notifications; everything else works if you decline, and you can turn them on later in System Settings → Notifications. The UI follows the system language (English or Simplified Chinese). To open AgentDock at login, add `AgentDock.app` in System Settings → General → Login Items.
+<details>
+<summary><b>Update and uninstall</b></summary>
 
-## Update
+**Update**: quit AgentDock, run `git pull` in the source folder, then run the install command again. Your followed conversations are kept.
 
-Quit AgentDock, then run in the source folder:
+**Uninstall**: quit and delete `AgentDock.app`, then remove AgentDock's local records (conversations in the source apps are not affected):
 
 ```bash
-git pull
-bash scripts/install-app.sh "$HOME/Applications/AgentDock.app"
+defaults delete com.local.AgentDock
+rm -rf "$HOME/Library/Application Support/AgentDock"
 ```
 
-Your followed and accepted conversations are kept.
+</details>
 
-## Uninstall
+<details>
+<summary><b>Troubleshooting</b></summary>
 
-1. Quit AgentDock and delete `AgentDock.app`.
-2. If you added a login item, remove it in System Settings → General → Login Items.
-3. Delete AgentDock's own local records:
-
-   ```bash
-   defaults delete com.local.AgentDock
-   rm -rf "$HOME/Library/Application Support/AgentDock"
-   ```
-
-   The first command removes the following and acceptance records; the second removes the Codex-compatible app configuration. Conversations in the source apps are not affected.
-
-## Troubleshooting
-
-- **An orange dot next to a source in the sidebar** means AgentDock could not read that app's data. Click Source Details in the bottom-right corner to see why; usually the app is not installed, has not been used on this Mac yet, or changed its storage format in an update.
-- **A status looks wrong**: open the card and read Status evidence, which names the record the status comes from.
-- **To check what each source reports**, run the following in the source folder. It scans twice, prints the timing, and lists conversation counts per app and state, without titles, paths, or message content.
+- **An orange dot next to a source**: AgentDock could not read that app's data. Click Source Details in the bottom-right corner to see why.
+- **A status looks wrong**: open the card; Status evidence names the record the status comes from.
+- **Check what each source reports**: the command below prints conversation counts per app and state, without any conversation content.
 
   ```bash
-  swift build -c release --product AgentDockScan
-  .build/release/AgentDockScan
+  swift build -c release --product AgentDockScan && .build/release/AgentDockScan
   ```
 
-- **Still stuck?** Open an issue with the source app's version, steps to reproduce, and the output above, and remove real work content from any screenshots.
+- Still stuck? [Open an issue](https://github.com/mengziheng/AgentDock/issues) with the app versions and steps to reproduce.
 
-## Your data stays on this Mac
+</details>
 
-AgentDock has no backend, calls no models, and uploads no conversations or logs. It opens the source apps' databases and state files read-only and keeps its following and acceptance records on this Mac.
+## Privacy
 
-Those records may include conversation titles, paths, first messages, and error summaries, and notifications show conversation titles. See [local data](docs/compatibility.md#本地数据) for what is read, and [SECURITY.md](SECURITY.md) for privacy issues (both in Chinese).
+AgentDock has no server, calls no models, and only reads local data. Its tracking records may include conversation titles and paths, and notifications show conversation titles. See [SECURITY.md](SECURITY.md) (Chinese).
 
-## Development
+## Contributing
 
 ```bash
 swift build -c release
 scripts/test.sh
 ```
 
-`scripts/test.sh` runs `swift test`, adding the Swift Testing framework paths when only the Command Line Tools are installed; with Xcode, plain `swift test` works too. Tests use synthetic data only, and GitHub Actions builds and tests every push and pull request. Reports about wrong statuses, version compatibility, and usability are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md) (Chinese).
+Tests use fictional data only. Reports of wrong statuses and compatibility issues are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md) (Chinese).
 
-[MIT License](LICENSE) · An independent project, not affiliated with or endorsed by the apps or vendors listed.
+<sub>MIT License · An independent project, not affiliated with the apps or their developers. Tasks in the screenshots are fictional.</sub>
