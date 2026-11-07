@@ -37,24 +37,27 @@ struct DevinLogCursor {
 }
 
 extension ConversationScanner {
-    func scanDevin() throws -> [Conversation] {
+    /// Devin's own session store lists the conversations; the desktop app only adds archive flags.
+    func scanDevin() throws -> (conversations: [Conversation], archivedIDs: Set<String>) {
         let app = TrackedApplication.devin
-        let uiDB = try ReadOnlyDatabase(support + "/Devin/User/globalStorage/state.vscdb")
         let cliRoot = home + "/.local/share/devin/cli"
-        let cliDB = try? ReadOnlyDatabase(cliRoot + "/sessions.db")
-        let cliRows = (try? cliDB?.rows("SELECT id,title,working_directory,last_activity_at,main_chain_id FROM sessions WHERE hidden=0")) ?? []
-        let cliSessions = Dictionary(cliRows.compactMap { row in row["id"].map { ($0, row) } }, uniquingKeysWith: { first, _ in first })
+        let cliDB = try ReadOnlyDatabase(cliRoot + "/sessions.db")
+        let rows = try cliDB.rows("SELECT id,title,working_directory,last_activity_at,main_chain_id FROM sessions WHERE hidden=0")
+        let annotations = devinSessionAnnotations()
         let refusals = latestDevinProviderRefusals(logRoot: cliRoot + "/logs")
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         var seen: Set<String> = []
-        let result = try uiDB.rows("SELECT value FROM ItemTable WHERE key LIKE 'windsurf.acp.sessioninfo.%'").compactMap { row -> Conversation? in
-            guard let value = json(row["value"]), let info = value["info"] as? [String: Any], let id = info["sessionId"] as? String, let title = info["title"] as? String, !title.isEmpty else { return nil }
-            let meta = info["_meta"] as? [String: Any] ?? [:]
-            let localID = id.components(separatedBy: "/").last ?? id
-            let cli = cliSessions[localID]
+        var archived: Set<String> = []
+        let result = rows.compactMap { cli -> Conversation? in
+            guard let localID = cli["id"], let title = cli["title"], !title.isEmpty else { return nil }
+            // Same identifier the desktop app uses, so its deep link and earlier tracking records still match.
+            let id = "acp/devin-cli/" + localID
+            let annotation = annotations["devin-acp/devin-cli/" + localID]
+            if annotation?["archived"] as? Bool == true {
+                archived.insert(app.id + "|" + id)
+                return nil
+            }
             var turn = DevinTurn()
-            if let cliDB, let cli, let chainID = cli["main_chain_id"] {
+            if let chainID = cli["main_chain_id"] {
                 let stamp = (cli["last_activity_at"] ?? "") + "|" + chainID
                 seen.insert(localID)
                 if let cached = devinTurns[localID], cached.stamp == stamp {
@@ -67,9 +70,8 @@ extension ConversationScanner {
                     turn = devinTurns[localID]?.turn ?? turn
                 }
             }
-            let timestamp = info["updatedAt"] as? String ?? meta["cognition.ai/createdAt"] as? String ?? ""
-            let uiDate = formatter.date(from: timestamp) ?? ISO8601DateFormatter().date(from: timestamp) ?? .distantPast
-            let cliDate = Date(timeIntervalSince1970: Double(cli?["last_activity_at"] ?? "0") ?? 0)
+            let lastActivity = cli["last_activity_at"] ?? ""
+            let cliDate = Date(timeIntervalSince1970: Double(lastActivity) ?? 0)
             // A refusal is resolved by a later assistant reply or by a new user turn.
             let refusal = refusals[localID].flatMap { $0.date >= max(turn.latestAssistant ?? .distantPast, turn.turnStarted ?? .distantPast) ? $0 : nil }
             let lockHeld = devinLockIsHeld(path: cliRoot + "/session_locks/" + localID + ".lock")
@@ -83,12 +85,26 @@ extension ConversationScanner {
             case .interrupted: evidence = String(localized: "The turn has no final reply and Devin no longer holds the session lock")
             case .unknown: evidence = String(localized: "No conversation turn was found in Devin's local session store")
             }
-            let activity = max(uiDate, cliDate, refusal?.date ?? .distantPast)
+            let activity = max(cliDate, refusal?.date ?? .distantPast)
             let errorRevision = refusal.map { "|content_filter|" + String($0.date.timeIntervalSince1970) } ?? ""
-            return Conversation(sessionID: id, application: app, title: cleanTitle(cli?["title"] ?? title), cwd: cli?["working_directory"] ?? info["cwd"] as? String ?? "", updatedAt: state == .completed ? (turn.headCreated ?? activity) : activity, state: state, evidence: evidence, revision: (turn.turnNodeID ?? timestamp) + "|" + state.rawValue + errorRevision, startedAt: turn.turnStarted)
+            return Conversation(sessionID: id, application: app, title: cleanTitle(title), cwd: cli["working_directory"] ?? "", updatedAt: state == .completed ? (turn.headCreated ?? activity) : activity, state: state, evidence: evidence, revision: (turn.turnNodeID ?? lastActivity) + "|" + state.rawValue + errorRevision, startedAt: turn.turnStarted)
         }
         devinTurns = devinTurns.filter { seen.contains($0.key) }
-        return result
+        return (result, archived)
+    }
+
+    /// Per-session flags (`archived`, `done`, ...) that the Devin desktop app keeps for each account.
+    private func devinSessionAnnotations() -> [String: [String: Any]] {
+        guard let db = try? ReadOnlyDatabase(support + "/Devin/User/globalStorage/state.vscdb"),
+              let rows = try? db.rows("SELECT value FROM ItemTable WHERE key LIKE 'devin.desktopShell.localSessionAnnotations.%'") else { return [:] }
+        var merged: [String: [String: Any]] = [:]
+        for row in rows {
+            for (key, value) in json(row["value"]) ?? [:] {
+                guard let flags = value as? [String: Any] else { continue }
+                merged[key, default: [:]].merge(flags) { first, second in (first as? Bool == true || second as? Bool == true) ? true : second }
+            }
+        }
+        return merged
     }
 
     /// Walks the main chain from its head back to the latest user message; nil when the store cannot be read.

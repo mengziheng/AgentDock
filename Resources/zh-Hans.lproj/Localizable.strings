@@ -30,7 +30,7 @@
 
 /* Cards */
 "Accept" = "确认验收";
-"Accept and remove from Following. The original conversation is not deleted and running work is not stopped." = "确认验收并移出跟进列表；不会删除原应用对话，也不会停止正在执行的任务。";
+"Accept and remove from Following. The original conversation is not deleted." = "确认验收并移出跟进列表；不会删除原应用中的对话。";
 "Removes it from Following without deleting the original conversation" = "确认后从跟进列表移除，不删除原应用中的聊天记录";
 "Answer" = "去回答";
 "Open" = "打开对话";
@@ -118,6 +118,9 @@
 "This turn finished; the overall task may still need follow-up" = "这一轮已结束，整个任务可能还需要跟进";
 "The log changed after the last turn record, but no turn event could be read" = "最后一条轮次记录之后日志仍有变化，但没有读到轮次事件";
 "The turn ended with an error or was stopped" = "轮次以错误结束或被停止";
+"From the Codex CLI thread behind this Orca tab" = "来自该 Orca 标签页背后的 Codex CLI 对话";
+"The turn has not finished and its Codex process still has the log open" = "轮次尚未结束，且对应的 Codex 进程仍打开着日志文件";
+"The turn never finished and no Codex process has its log open anymore" = "轮次没有正常结束，且已没有 Codex 进程打开它的日志文件";
 "Error: %@" = "错误：%@";
 "The run returned an error" = "执行返回了错误信息";
 "The source no longer lists this conversation while it was still active; the last record is kept until you accept it" = "对话仍在进行时，来源不再列出它；保留最后记录直到你确认验收";

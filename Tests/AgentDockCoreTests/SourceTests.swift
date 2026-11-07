@@ -93,6 +93,28 @@ struct Fixture {
         #expect(scanner.scan(runningApplications: ["com.openai.codex": Date().addingTimeInterval(60)]).conversations.first?.state == .interrupted)
     }
 
+    @Test func orcaLocalCodexTabUsesCodexTurn() throws {
+        let started = Date().addingTimeInterval(-120).timeIntervalSince1970.rounded()
+        let (fixture, rollout) = try codexFixture(started: started)
+        let payload = #"{"tabsByWorktree":{"ws::/repo":[{"launchAgent":"codex","aiVaultTitle":{"sessionId":"thread-1","title":"Local task","agent":"codex"}}]}}"#
+        _ = try fixture.database("Library/Application Support/orca/profiles/local-default/profile-state.db", """
+            CREATE TABLE profile_state_documents (domain TEXT, payload TEXT, updated_at INTEGER);
+            INSERT INTO profile_state_documents VALUES ('workspaceSession', '\(payload)', 0);
+            """)
+        let scanner = ConversationScanner(home: fixture.home)
+        let unfinished = scanner.scan(runningApplications: ["com.openai.codex": .distantPast]).conversations
+        #expect(unfinished.count == 1, "the Codex CLI thread appears once, under Orca")
+        let item = try #require(unfinished.first)
+        // No codex process has the fixture log open.
+        #expect(item.application.id == TrackedApplication.orca.id && item.state == .interrupted && item.cwd == "/repo")
+        let handle = try FileHandle(forWritingTo: URL(fileURLWithPath: rollout))
+        try handle.seekToEnd()
+        try handle.write(contentsOf: Data(codexEvent("task_complete", at: started + 30).utf8))
+        try handle.close()
+        let finished = try #require(scanner.scan().conversations.first)
+        #expect(finished.state == .completed && finished.startedAt == Date(timeIntervalSince1970: started))
+    }
+
     @Test func devinMainChainTurn() throws {
         let fixture = try Fixture()
         func node(_ session: String, _ id: Int, _ parent: Int?, _ created: Int, _ message: String) -> String {
@@ -118,6 +140,25 @@ struct Fixture {
         #expect(waiting.state(lockHeld: true) == .awaitingInput && waiting.state(lockHeld: false) == .interrupted)
         let next = try #require(ConversationScanner.devinTurn(db: db, sessionID: "next", mainChainID: "4"))
         #expect(next.state(lockHeld: true) == .running && next.turnNodeID == "3" && next.latestAssistant == Date(timeIntervalSince1970: 3003))
+    }
+
+    @Test func devinSessionsComeFromSessionStoreAndRespectArchive() throws {
+        let fixture = try Fixture()
+        let reply = #"{"role":"assistant","content":"done","metadata":{"finish_reason":"stop"}}"#
+        _ = try fixture.database(".local/share/devin/cli/sessions.db", """
+            CREATE TABLE sessions (id TEXT PRIMARY KEY, title TEXT, working_directory TEXT, last_activity_at INTEGER, main_chain_id INTEGER, hidden INTEGER);
+            CREATE TABLE message_nodes (row_id INTEGER PRIMARY KEY AUTOINCREMENT, session_id TEXT NOT NULL, node_id INTEGER NOT NULL, parent_node_id INTEGER, chat_message TEXT NOT NULL, created_at INTEGER NOT NULL);
+            INSERT INTO sessions VALUES ('kept', 'Kept task', '/repo', 1000, 1, 0), ('gone', 'Archived task', '/repo', 1000, NULL, 0), ('hidden', 'Hidden', '/repo', 1000, NULL, 1), ('blank', NULL, '/repo', 1000, NULL, 0);
+            INSERT INTO message_nodes (session_id,node_id,parent_node_id,chat_message,created_at) VALUES ('kept', 1, NULL, '\(reply)', 1000);
+            """)
+        _ = try fixture.database("Library/Application Support/Devin/User/globalStorage/state.vscdb", """
+            CREATE TABLE ItemTable (key TEXT PRIMARY KEY, value TEXT);
+            INSERT INTO ItemTable VALUES ('devin.desktopShell.localSessionAnnotations.org-1', '{"devin-acp/devin-cli/gone":{"archived":true},"devin-acp/devin-cli/kept":{"archived":false}}');
+            """)
+        let scan = ConversationScanner(home: fixture.home).scan()
+        let item = try #require(scan.conversations.first)
+        #expect(scan.conversations.count == 1 && item.sessionID == "acp/devin-cli/kept" && item.state == .completed)
+        #expect(scan.archivedConversationIDs == [TrackedApplication.devin.id + "|acp/devin-cli/gone"])
     }
 
     @Test func devinRefusalSpansIncrementalReads() {

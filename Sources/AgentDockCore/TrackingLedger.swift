@@ -47,6 +47,25 @@ public struct TrackingLedger: Codable, Sendable {
     public func contains(_ item: Conversation) -> Bool { tracked.contains(item.id) }
 }
 
+/// Finds turns that started and ended between two scans, so the ledger never saw them running.
+public struct MissedTurnDetector: Sendable {
+    private var executions: [String: String]?
+    private var lastScan: Date?
+    public init() {}
+    /// Conversations whose turn changed since the previous scan and already ended after that scan
+    /// started. The first call only records a baseline, so history is never imported.
+    public mutating func missedTurns(in conversations: [Conversation], scanStarted: Date) -> [Conversation] {
+        defer {
+            executions = Dictionary(conversations.map { ($0.id, $0.executionID) }, uniquingKeysWith: { first, _ in first })
+            lastScan = scanStarted
+        }
+        guard let executions, let lastScan else { return [] }
+        return conversations.filter { item in
+            item.state != .running && item.state != .unknown && executions[item.id] != item.executionID && item.updatedAt >= lastScan
+        }
+    }
+}
+
 extension Conversation {
     public var executionID: String { revision.components(separatedBy: "|").first ?? revision }
 }

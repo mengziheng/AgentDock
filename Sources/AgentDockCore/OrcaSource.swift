@@ -35,6 +35,13 @@ extension ConversationScanner {
             if let saved = remoteHistory[item.sessionID], saved.updatedAt >= item.updatedAt { continue }
             remoteHistory[item.sessionID] = item
         }
+        // Local Orca tabs that run the Codex CLI store their thread in Codex's own database.
+        let codexRoot = CodexAppSource.officialCodex.dataRoot(home: home)
+        let codexDB = try? ReadOnlyDatabase(codexRoot + "/state_5.sqlite")
+        let codexHistory = codexDB == nil ? nil : try? ReadOnlyDatabase(codexRoot + "/thread_history_1.sqlite")
+        var openRollouts: Set<String>?
+        var cliKeys: Set<String> = []
+        orcaCodexPaths = []
         for row in rows {
             guard let payload = json(row["payload"]) else { continue }
             if row["domain"] == "remoteLayoutSnapshots" {
@@ -48,15 +55,40 @@ extension ConversationScanner {
                 for (workspace, items) in tabs {
                     for tab in items {
                         guard let vault = tab["aiVaultTitle"] as? [String: Any], let id = vault["sessionId"] as? String else { continue }
+                        let title = vault["title"] as? String ?? tab["title"] as? String ?? id
+                        let cwd = workspace.components(separatedBy: "::").last ?? workspace
+                        if (tab["launchAgent"] as? String ?? vault["agent"] as? String) == "codex",
+                           let thread = try? codexDB?.rows("SELECT id,rollout_path,updated_at FROM threads WHERE id=?", values: [id]).first {
+                            let key = "orca|" + id
+                            let path = thread["rollout_path"] ?? ""
+                            cliKeys.insert(key)
+                            orcaCodexPaths.insert(path)
+                            let turn = cachedCodexTurn(key: key, row: thread, history: codexHistory)
+                            if (turn.raw == "inProgress" || turn.raw == "awaitingInput") && openRollouts == nil { openRollouts = OpenFiles.rolloutsOpenByCodex() }
+                            let lastActivity = max(turn.updated, turn.modified)
+                            let state = ExecutionState.liveness(raw: turn.raw, lastActivity: lastActivity, processLaunch: openRollouts?.contains(path) == true ? .distantPast : nil)
+                            let reading: String
+                            switch state {
+                            case .running: reading = String(localized: "The turn has not finished and its Codex process still has the log open")
+                            case .awaitingInput: reading = String(localized: "The agent asked a question that has no answer yet; waiting for you")
+                            case .interrupted where turn.raw != "interrupted": reading = String(localized: "The turn never finished and no Codex process has its log open anymore")
+                            case .completed: reading = String(localized: "This turn finished; the overall task may still need follow-up")
+                            case .unknown: reading = String(localized: "The log changed after the last turn record, but no turn event could be read")
+                            case .failed, .interrupted: reading = String(localized: "The turn ended with an error or was stopped")
+                            }
+                            let evidence = String(localized: "From the Codex CLI thread behind this Orca tab") + "; " + reading + (turn.error.map { "; " + String(localized: "Error: \($0)") } ?? "")
+                            result[id] = Conversation(sessionID: id, application: app, title: cleanTitle(title), cwd: cwd, updatedAt: state == .running ? lastActivity : turn.updated, state: state, evidence: evidence, revision: turn.turnID + "|" + state.rawValue, startedAt: turn.startedAt)
+                            continue
+                        }
                         let sleep = sleeping.first { ($0["providerSession"] as? [String: Any])?["id"] as? String == id }
                         let milliseconds = sleep?["updatedAt"] as? Double ?? tab["createdAt"] as? Double ?? 0
                         let state: ExecutionState = sleep?["state"] as? String == "done" ? .completed : .unknown
-                        let title = vault["title"] as? String ?? tab["title"] as? String ?? id
-                        result[id] = Conversation(sessionID: id, application: app, title: cleanTitle(title), cwd: workspace.components(separatedBy: "::").last ?? workspace, updatedAt: Date(timeIntervalSince1970: milliseconds / 1000), state: state, evidence: state == .completed ? String(localized: "Orca saved this sleeping session as done; this is not a live signal") : String(localized: "Conversation read from Orca; its remote or unrecorded execution status cannot be confirmed"), revision: String(milliseconds))
+                        result[id] = Conversation(sessionID: id, application: app, title: cleanTitle(title), cwd: cwd, updatedAt: Date(timeIntervalSince1970: milliseconds / 1000), state: state, evidence: state == .completed ? String(localized: "Orca saved this sleeping session as done; this is not a live signal") : String(localized: "Conversation read from Orca; its remote or unrecorded execution status cannot be confirmed"), revision: String(milliseconds))
                     }
                 }
             }
         }
+        pruneCodexTurns(prefix: "orca|", keeping: cliKeys)
         return Array(result.values)
     }
 

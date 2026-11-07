@@ -341,10 +341,10 @@ private struct ConversationCard: View {
             HStack(spacing: 12) {
                 cardTime
                 Spacer()
-                if needsReview && conversation.state != .awaitingInput {
+                if needsReview && conversation.state != .running && conversation.state != .awaitingInput {
                     Button("Accept") { monitor.acknowledge([conversation]) }
                         .buttonStyle(DockActionStyle()).hoverFeedback()
-                        .help("Accept and remove from Following. The original conversation is not deleted and running work is not stopped.")
+                        .help("Accept and remove from Following. The original conversation is not deleted.")
                         .accessibilityHint("Removes it from Following without deleting the original conversation")
                 }
                 Button { monitor.activate(conversation) } label: {

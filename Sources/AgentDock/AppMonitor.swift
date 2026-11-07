@@ -27,6 +27,7 @@ final class AppMonitor: ObservableObject {
     private let defaults = UserDefaults.standard
     private let scanner = ConversationScanner()
     private let notifier = ConversationNotifier()
+    private var missedTurns = MissedTurnDetector()
     /// Categories of tracked conversations at the previous refresh; nil until the first scan sets a baseline.
     private var lastCategories: [String: FollowUpCategory]?
 
@@ -49,9 +50,14 @@ final class AppMonitor: ObservableObject {
             app.bundleIdentifier.map { ($0, app.launchDate ?? .distantPast) }
         }, uniquingKeysWith: { min($0, $1) })
         let scanner = scanner
+        let started = Date()
         Task {
             let result = await Task.detached(priority: .utility) { scanner.scan(previousConversations: previousConversations, runningApplications: running) }.value
             ledger.observe(result.conversations, archivedIDs: result.archivedConversationIDs, authoritativeApplicationIDs: result.authoritativeApplicationIDs)
+            // A turn that started and ended between two polls was never seen running.
+            for item in missedTurns.missedTurns(in: result.conversations, scanStarted: started) {
+                ledger.recoverMissedExecution(item)
+            }
             // Orca clears live agentStatus immediately at turn completion. When its
             // durable rotating snapshot proves that a currently open terminal was
             // running between polls, recover that missed lifecycle into the workbench.

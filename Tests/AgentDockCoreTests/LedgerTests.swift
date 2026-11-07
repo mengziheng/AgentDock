@@ -67,6 +67,20 @@ import Testing
         #expect(ledger.contains(finished), "after undo the turn is tracked as before")
     }
 
+    @Test func shortTurnBetweenScansIsDetected() {
+        var detector = MissedTurnDetector()
+        let firstScan = Date(timeIntervalSince1970: 100_000)
+        let old = Conversation(sessionID: "tracked", application: app, title: "Task", cwd: "", updatedAt: firstScan.addingTimeInterval(-3600), state: .completed, evidence: "", revision: "turn-1|completed")
+        #expect(detector.missedTurns(in: [old], scanStarted: firstScan).isEmpty, "the first scan is only a baseline")
+        let secondScan = firstScan.addingTimeInterval(8)
+        #expect(detector.missedTurns(in: [old], scanStarted: secondScan).isEmpty, "an unchanged turn is not new")
+        let quick = Conversation(sessionID: "tracked", application: app, title: "Task", cwd: "", updatedAt: secondScan.addingTimeInterval(3), state: .completed, evidence: "", revision: "turn-2|completed")
+        let fresh = Conversation(sessionID: "new", application: app, title: "New", cwd: "", updatedAt: secondScan.addingTimeInterval(5), state: .failed, evidence: "", revision: "turn-9|failed")
+        let reappeared = Conversation(sessionID: "old-archive", application: app, title: "Old", cwd: "", updatedAt: firstScan.addingTimeInterval(-86400), state: .completed, evidence: "", revision: "turn-5|completed")
+        let missed = detector.missedTurns(in: [quick, fresh, reappeared], scanStarted: secondScan.addingTimeInterval(8))
+        #expect(Set(missed.map(\.sessionID)) == ["tracked", "new"])
+    }
+
     @Test func recoveredExecutionRespectsAcceptance() {
         var ledger = TrackingLedger()
         let finished = execution("turn-1", .completed)

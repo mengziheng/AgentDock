@@ -128,7 +128,9 @@ public final class ConversationScanner: @unchecked Sendable {
     public let home: String
     private let lock = NSLock()
     private var codexTurns: [String: (stamp: String, turn: CodexTurn)] = [:]
-    private var rolloutCursors: [String: RolloutCursor] = [:]
+    var rolloutCursors: [String: RolloutCursor] = [:]
+    /// Rollout logs of Codex CLI threads behind Orca tabs in the current scan; Orca is scanned first.
+    var orcaCodexPaths: Set<String> = []
     var devinTurns: [String: (stamp: String, turn: DevinTurn)] = [:]
     var devinLogs: [String: DevinLogCursor] = [:]
     var orcaBackups: [String: (stamp: Date, agents: [String: Conversation])] = [:]
@@ -172,7 +174,9 @@ public final class ConversationScanner: @unchecked Sendable {
         }
         conversations += orca
         do {
-            conversations += try scanDevin()
+            let devin = try scanDevin()
+            conversations += devin.conversations
+            archivedIDs.formUnion(devin.archivedIDs)
             authoritativeIDs.insert(TrackedApplication.devin.id)
             sources.append(.init(application: .devin, detail: String(localized: "Connected: conversations, turn status, and provider refusals"), connected: true))
         } catch {
@@ -205,21 +209,9 @@ public final class ConversationScanner: @unchecked Sendable {
             let id = row["id"] ?? ""
             let path = row["rollout_path"] ?? ""
             paths.insert(path)
-            let attributes = try? FileManager.default.attributesOfItem(atPath: path)
-            let modified = attributes?[.modificationDate] as? Date
-            let stamp = "\(row["updated_at"] ?? "")|\(modified?.timeIntervalSince1970 ?? 0)|\(attributes?[.size] as? UInt64 ?? 0)"
             let key = root + "|" + id
             seen.insert(key)
-            let turn: CodexTurn
-            if let cached = codexTurns[key], cached.stamp == stamp {
-                turn = cached.turn
-            } else {
-                let read = readCodexTurn(id: id, row: row, path: path, modified: modified, history: history)
-                // A busy or unreadable turn database is transient: keep the previous result
-                // for this scan and retry on the next one.
-                if read.complete { codexTurns[key] = (stamp, read.turn) }
-                turn = read.complete ? read.turn : codexTurns[key]?.turn ?? read.turn
-            }
+            let turn = cachedCodexTurn(key: key, row: row, history: history)
             let lastActivity = max(turn.updated, turn.modified)
             let state = ExecutionState.liveness(raw: turn.raw, lastActivity: lastActivity, processLaunch: processLaunch)
             let abandoned = state == .interrupted && turn.raw != "interrupted"
@@ -239,9 +231,28 @@ public final class ConversationScanner: @unchecked Sendable {
             let project = catalog.resolve(sessionID: id, projectID: row["project_id"], cwd: row["cwd"] ?? "")
             return Conversation(sessionID: id, application: app, title: cleanTitle(name.isEmpty ? (message.isEmpty ? String(localized: "Untitled conversation") : message) : name), cwd: row["cwd"] ?? "", updatedAt: state == .running ? lastActivity : turn.updated, state: state, evidence: detail, revision: turn.turnID + "|" + state.rawValue, projectName: project.name, projectEvidence: project.evidence, titleEvidence: name.isEmpty ? String(localized: "The source saved no conversation name; showing the first message") : String(localized: "Conversation name saved by the app"), openingMessage: message, startedAt: turn.startedAt)
         }
-        for key in codexTurns.keys where key.hasPrefix(root + "|") && !seen.contains(key) { codexTurns.removeValue(forKey: key) }
-        rolloutCursors = rolloutCursors.filter { !$0.key.hasPrefix(root + "/") || paths.contains($0.key) }
+        pruneCodexTurns(prefix: root + "|", keeping: seen)
+        rolloutCursors = rolloutCursors.filter { !$0.key.hasPrefix(root + "/") || paths.contains($0.key) || orcaCodexPaths.contains($0.key) }
         return result
+    }
+
+    /// Latest turn of a Codex thread row (`id`, `rollout_path`, `updated_at`), re-read only when the row or its log changed.
+    func cachedCodexTurn(key: String, row: [String: String], history: ReadOnlyDatabase?) -> CodexTurn {
+        let path = row["rollout_path"] ?? ""
+        let attributes = try? FileManager.default.attributesOfItem(atPath: path)
+        let modified = attributes?[.modificationDate] as? Date
+        let stamp = "\(row["updated_at"] ?? "")|\(modified?.timeIntervalSince1970 ?? 0)|\(attributes?[.size] as? UInt64 ?? 0)"
+        if let cached = codexTurns[key], cached.stamp == stamp { return cached.turn }
+        let read = readCodexTurn(id: row["id"] ?? "", row: row, path: path, modified: modified, history: history)
+        // A busy or unreadable turn database is transient: keep the previous result
+        // for this scan and retry on the next one.
+        if read.complete { codexTurns[key] = (stamp, read.turn) }
+        return read.complete ? read.turn : codexTurns[key]?.turn ?? read.turn
+    }
+
+    /// Drops cached Codex turns under `prefix` that were not read in this scan.
+    func pruneCodexTurns(prefix: String, keeping seen: Set<String>) {
+        for key in codexTurns.keys where key.hasPrefix(prefix) && !seen.contains(key) { codexTurns.removeValue(forKey: key) }
     }
 
     private func readCodexTurn(id: String, row: [String: String], path: String, modified: Date?, history: ReadOnlyDatabase?) -> (turn: CodexTurn, complete: Bool) {
